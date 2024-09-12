@@ -1,0 +1,118 @@
+// INTERFACE
+// in return it will return we have to enter variable type it is returning in soldity
+#define function deposit() payable returns()
+#define function withdraw(uint) nonpayable returns()
+#define function balances(uint) nonpayable returns(uint256)
+#define function name(string) nonpayable returns(string)
+
+// 0x5b43bc99 == name
+// 0x4903b0d1 == balances
+// 0x2e1a7d4d == withdraw
+// 0xd0e30db0 == deposit
+
+
+// CONSTANTS STORAGE POINTERS 
+#define constant NAME = FREE_STORAGE_POINTER()
+#define constant BALANCES = FREE_STORAGE_POINTER()
+
+#define macro CONSTRUCTOR() = takes(0) returns(0){
+    // Check if value is being passed or not 
+    // Send it to the state variable
+    0x00 calldatasize 
+
+    dup1            //[calldata,calldata,0x00]
+    iszero          //[calldata==0,calldata,0x00]
+    error           // if true then jump to the error
+    jumpi           //[calldata,0x00]
+    [NAME]
+    sstore
+
+    stop
+    // Return
+    // 0x00 0x00 return
+
+    error:
+        0x00
+        dup1
+        revert 
+}
+
+#define macro MAIN() =  takes(0) returns(0) {
+
+    0x00 calldataload 0xe0 shr     //[func_selectr]
+    0x04
+    calldatasize                    //[size_of_data, 0x04, func_selectr]
+    swap1                           //[0x04, size_of_data, func_selectr]
+    dup2                            //[size_of_data, 0x04, size_of_data, func_selectr]
+    lt                              //[size_of_data < 0x04, size_of_data, func_selectr]
+    error                           
+    jumpi                           //[size_of_data, func_selectr]
+
+    dup2                            //[func_selectr, size_of_data, func_selectr]
+    __FUNC_SIG(name)                //[fucn_sig, func_selectr, size_of_data, func_selectr]
+    eq Name jumpi                   //[size_of_data, func_selectr]]
+
+    dup2                            //[func_selectr, size_of_data, func_selectr]
+    __FUNC_SIG(deposit)                //[fucn_sig, func_selectr, size_of_data, func_selectr]
+    eq Deposit jumpi                   //[size_of_data, func_selectr]]
+
+    dup2                            //[func_selectr, size_of_data, func_selectr]
+    __FUNC_SIG(withdraw)                //[fucn_sig, func_selectr, size_of_data, func_selectr]
+    eq Withdraw jumpi                   //[size_of_data, func_selectr]]
+
+    dup2                            //[func_selectr, size_of_data, func_selectr]
+    __FUNC_SIG(balances)                //[fucn_sig, func_selectr, size_of_data, func_selectr]
+    eq Balances jumpi                   //[size_of_data, func_selectr]]
+    // check if function selector is being passed -- DONE
+    // Check if value is being passed if not than continue --- Remaining apply in the function required
+    // If yes then apply a jumpdest
+
+    error:
+        0x00
+        dup1
+        revert
+    
+    Name:
+        GET_NAME()
+        // jump
+    
+    Deposit:
+        DEPOSIT_VALUE()
+        // jump
+    
+    Withdraw:
+        WITHDRAW_VALUE()
+        // jump
+    
+    Balances:
+        KNOW_BALANCE()
+        // jump
+}
+
+#define macro GET_NAME() = takes(0) returns(0){
+    // Get storage value
+    // Set value in memory 
+    // return value from memory in the stack
+    [NAME]
+    sload       // [Name]
+
+    0x00        //[0x00, name]
+    mstore      // Stack:0 Memory:[value]
+
+    0x20 0x00 return
+    
+}
+
+#define macro DEPOSIT_VALUE() = takes(0) returns(0){
+    
+}
+
+#define macro WITHDRAW_VALUE() = takes(0) returns(0){
+    
+}
+
+#define macro KNOW_BALANCE() = takes(0) returns(0){
+    
+}
+
+// I ahve 1 question why can't we put errors in jumpdest rather continue to go to the another opcodes journey line by line 
